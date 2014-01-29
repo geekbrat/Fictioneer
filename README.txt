@@ -1,6 +1,6 @@
 // ----------------------------------------------------------------------
 // Fictioneer 0.1 
-// Copyright (C) 2013 StoryPortal Fiction Network
+// Copyright (C) 2014 StoryPortal Fiction Network
 // Based on eFiction 3.5.3
 // Copyright (c) 2007 by Tammy Keefer
 // Based on eFiction 1.1

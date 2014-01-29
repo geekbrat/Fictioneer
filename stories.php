@@ -35,6 +35,7 @@ $tpl->assignInclude( "footer", "./$skindir/footer.tpl" );
 
 include("includes/pagesetup.php");
 include("includes/storyform.php");
+require_once("includes/docx2html/docx2html.php");
 
 
 // before doing anything else check if the visitor is logged in.  If they are, check if they're an admin.  If not, check that they're 
@@ -156,18 +157,25 @@ function newstory( ) {
 	$endnotes = isset($_POST['endnotes']) ? strip_tags(descript($_POST['endnotes']), $allowed_tags) : "";
 	$story = "";
 	if(isset($_FILES['storyfile']['name']) && $_FILES['storyfile']['name']) {
-		if ($_FILES['storyfile']['type'] != 'text/html' && $_FILES['storyfile']['type'] != 'text/plain') {
- 			$failed = _INVALIDUPLOAD;
-			$submit = _PREVIEW;
-		}
-		else {
-			$texts = file($_FILES['storyfile']['tmp_name']);
-			foreach ($texts as $text) {
-				if($_FILES['storyfile']['type'] == 'text/html') $story .= rtrim($text, "\n\r\t")." ";
-				else $story .= $text;
+		$allowedExts = array('docx','html','htm','txt','text','tx');
+		$temp = explode('.', $_FILES['storyfile']['name']);
+		$extension = end($temp);
+		if ($_FILES['storyfile']['error'] > 0) {
+			$failed = _INVALIDUPLOAD;
+            $submit = _PREVIEW;
+		} else if ($_FILES['storyfile']['type'] != 'text/html' && $_FILES['storyfile']['type'] != 'text/plain' && $_FILES['storyfile']['type'] != 'application/octet-stream' && !in_array($extension, $allowedExts)) {
+            $failed = _INVALIDUPLOAD;
+            $submit = _PREVIEW;
+        } else {
+            $texts = file($_FILES['storyfile']['tmp_name']);
+            foreach ($texts as $text) {
+                if($_FILES['storyfile']['type'] == 'text/html') $story .= rtrim($text, "\n\r\t")." ";
+                else if($extension=='docx') $story=doc2html($_FILES['storyfile']['tmp_name']);
+                else $story .= $text;
 			}
 		}
 	}
+
 	else if(isset($_POST['storytext'])) $story = $_POST['storytext'];
 	$storytext = descript(strip_tags($story, $allowed_tags));
 	$words_to_count = strip_tags($storytext);
